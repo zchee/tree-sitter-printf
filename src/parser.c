@@ -1,11 +1,11 @@
-#include <tree_sitter/parser.h>
+#include "tree_sitter/parser.h"
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 
-#define LANGUAGE_VERSION 13
+#define LANGUAGE_VERSION 14
 #define STATE_COUNT 42
 #define LARGE_STATE_COUNT 10
 #define SYMBOL_COUNT 26
@@ -16,7 +16,7 @@
 #define MAX_ALIAS_SEQUENCE_LENGTH 6
 #define PRODUCTION_ID_COUNT 17
 
-enum {
+enum ts_symbol_identifiers {
   anon_sym_DQUOTE = 1,
   anon_sym_PERCENT_PERCENT = 2,
   anon_sym_PERCENT = 3,
@@ -209,7 +209,7 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
   },
 };
 
-enum {
+enum ts_field_identifiers {
   field_flags = 1,
   field_precision = 2,
   field_size = 3,
@@ -320,6 +320,51 @@ static const uint16_t ts_non_terminal_alias_map[] = {
   0,
 };
 
+static const TSStateId ts_primary_state_ids[STATE_COUNT] = {
+  [0] = 0,
+  [1] = 1,
+  [2] = 2,
+  [3] = 3,
+  [4] = 4,
+  [5] = 5,
+  [6] = 6,
+  [7] = 7,
+  [8] = 8,
+  [9] = 9,
+  [10] = 10,
+  [11] = 11,
+  [12] = 12,
+  [13] = 13,
+  [14] = 14,
+  [15] = 15,
+  [16] = 16,
+  [17] = 17,
+  [18] = 18,
+  [19] = 19,
+  [20] = 20,
+  [21] = 21,
+  [22] = 22,
+  [23] = 23,
+  [24] = 24,
+  [25] = 25,
+  [26] = 26,
+  [27] = 27,
+  [28] = 28,
+  [29] = 29,
+  [30] = 30,
+  [31] = 31,
+  [32] = 32,
+  [33] = 33,
+  [34] = 34,
+  [35] = 35,
+  [36] = 36,
+  [37] = 37,
+  [38] = 38,
+  [39] = 39,
+  [40] = 40,
+  [41] = 41,
+};
+
 static bool ts_lex(TSLexer *lexer, TSStateId state) {
   START_LEXER();
   eof = lexer->eof(lexer);
@@ -338,9 +383,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == 't') ADVANCE(23);
       if (lookahead == 'w') ADVANCE(24);
       if (lookahead == 'z') ADVANCE(25);
-      if (lookahead == '\t' ||
-          lookahead == '\n' ||
-          lookahead == '\r' ||
+      if (('\t' <= lookahead && lookahead <= '\r') ||
           lookahead == ' ') SKIP(0)
       if (lookahead == '*' ||
           ('1' <= lookahead && lookahead <= '9')) ADVANCE(15);
@@ -361,9 +404,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '#' ||
           lookahead == '+' ||
           lookahead == '-') ADVANCE(12);
-      if (lookahead == '\t' ||
-          lookahead == '\n' ||
-          lookahead == '\r') SKIP(1)
+      if (('\t' <= lookahead && lookahead <= '\r')) SKIP(1)
       if (lookahead == '*' ||
           ('1' <= lookahead && lookahead <= '9')) ADVANCE(15);
       if (('a' <= lookahead && lookahead <= 'y')) ADVANCE(11);
@@ -371,9 +412,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
     case 2:
       if (lookahead == '"') ADVANCE(8);
       if (lookahead == '%') ADVANCE(10);
-      if (lookahead == '\t' ||
-          lookahead == '\n' ||
-          lookahead == '\r' ||
+      if (('\t' <= lookahead && lookahead <= '\r') ||
           lookahead == ' ') ADVANCE(29);
       if (lookahead != 0) ADVANCE(30);
       END_STATE();
@@ -384,9 +423,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       if (lookahead == '4') ADVANCE(28);
       END_STATE();
     case 5:
-      if (lookahead == '\t' ||
-          lookahead == '\n' ||
-          lookahead == '\r' ||
+      if (('\t' <= lookahead && lookahead <= '\r') ||
           lookahead == ' ') SKIP(5)
       if (('a' <= lookahead && lookahead <= 'z')) ADVANCE(11);
       END_STATE();
@@ -479,9 +516,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
     case 29:
       ACCEPT_TOKEN(sym_text);
       if (lookahead == '"') ADVANCE(8);
-      if (lookahead == '\t' ||
-          lookahead == '\n' ||
-          lookahead == '\r' ||
+      if (('\t' <= lookahead && lookahead <= '\r') ||
           lookahead == ' ') ADVANCE(29);
       if (lookahead != 0 &&
           lookahead != '%') ADVANCE(30);
@@ -1011,6 +1046,7 @@ extern const TSLanguage *tree_sitter_printf(void) {
     .alias_sequences = &ts_alias_sequences[0][0],
     .lex_modes = ts_lex_modes,
     .lex_fn = ts_lex,
+    .primary_state_ids = ts_primary_state_ids,
   };
   return &language;
 }
